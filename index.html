@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>200만 년 전에서 살아남기</title>
+<meta name="description" content="국립중앙과학관 인류관 전시에서 답을 찾아 장비를 열고, AI가 쓴 묘사의 거짓을 가려내 살아남는 고등학교 수업용 앱.">
+<meta name="theme-color" content="#14110d">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://illyugwan.vercel.app">
+<meta property="og:site_name" content="국립중앙과학관 인류관 연계 수업">
+<meta property="og:title" content="200만 년 전에서 살아남기">
+<meta property="og:description" content="전시에서 찾은 것만 장비로 열립니다. AI가 쓴 묘사의 거짓을 못 잡으면 그 거짓을 안고 출발합니다. 고1~3 · 준비물 없음 · 앱 설치 없음">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314110d'/%3E%3Cpath d='M16 6a5 5 0 0 1 5 5c0 2-1 3-1 5l1 10h-10l1-10c0-2-1-3-1-5a5 5 0 0 1 5-5z' fill='%23c4603f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#14110d; --surface:#1c1813; --surface-2:#231e18;
+  --line:#332c23; --line-soft:#272119;
+  --ink:#e8dfd0; --ink-2:#a49780; --ink-3:#7a6f5e;
+  --red:#c4603f; --yellow:#cfa055; --sage:#8b9a6d; --blue:#6d87a0;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --slab:"Bitter",Georgia,serif;
+  --kr:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  padding:max(16px,env(safe-area-inset-top)) 15px calc(40px + env(safe-area-inset-bottom));}
+.wrap{max-width:500px;margin:0 auto;display:flex;flex-direction:column;gap:13px}
+[hidden]{display:none !important}
+
+.lab{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+h1{margin:0;font-family:var(--slab);font-size:29px;font-weight:700;line-height:1.16;text-wrap:balance}
+h2{margin:0;font-family:var(--slab);font-size:21px;font-weight:700;line-height:1.25;text-wrap:balance}
+p{margin:0;color:var(--ink-2);font-size:14.5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+button{font:inherit;font-weight:600;font-size:15.5px;padding:14px 16px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink);width:100%;text-align:left}
+button.pri{background:var(--yellow);border-color:var(--yellow);color:#1a1206;text-align:center}
+button.go{background:var(--sage);border-color:var(--sage);color:#fff;text-align:center}
+button.mid{text-align:center}
+button:disabled{opacity:.38;cursor:not-allowed}
+button:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.ghost{background:transparent;color:var(--ink-2);font-size:13.5px;padding:11px;text-align:center}
+
+.steps{display:flex;gap:5px}
+.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps i.on{background:var(--sage)}
+.steps i.half{background:var(--yellow)}
+
+/* 미션 */
+.mlist{display:flex;flex-direction:column;gap:9px}
+.mrow{display:flex;gap:12px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);text-align:left;width:100%}
+.mrow .n{font-family:var(--mono);font-size:11px;color:var(--ink-3);min-width:18px}
+.mrow .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mrow .t b{font-size:14.5px;font-weight:600}
+.mrow .t span{font-size:12.5px;color:var(--ink-3)}
+.mrow .mk{font-family:var(--slab);font-size:16px;color:var(--ink-3);flex:none;min-width:22px;text-align:center}
+.mrow.done{border-color:var(--sage)} .mrow.done .mk{color:var(--sage)}
+.mrow.locked{opacity:.45}
+.mrow.locked .mk{color:var(--red);font-size:12px;font-family:var(--mono)}
+
+.q{font-family:var(--slab);font-size:18.5px;font-weight:600;line-height:1.45}
+.where{font-size:12.5px;color:var(--yellow);font-family:var(--mono)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{font-size:15px;padding:13px 15px}
+.opts button.right{border-color:var(--sage);background:rgba(139,154,109,.16)}
+.fb{font-size:14px;line-height:1.65;padding:13px 15px;border-radius:9px;border-left:3px solid var(--sage);background:var(--surface-2)}
+.fb.no{border-left-color:var(--red)}
+.fb b{color:var(--ink)}
+.unlock{font-family:var(--mono);font-size:12px;color:var(--sage);margin-top:8px;display:block}
+.tries{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+
+/* AI 검증 */
+.aitext{font-size:16px;line-height:2.15;color:var(--ink)}
+.tok{border-bottom:1px dashed var(--ink-3);padding:2px 3px;border-radius:4px;cursor:pointer;
+  transition:background .12s,border-color .12s;white-space:nowrap}
+.tok[aria-pressed=true]{background:rgba(196,96,63,.22);border-bottom:2px solid var(--red);color:var(--red);font-weight:600}
+.tok.rv-hit{background:rgba(139,154,109,.22);border-bottom:2px solid var(--sage);color:var(--sage);font-weight:600}
+.tok.rv-miss{background:rgba(196,96,63,.14);border-bottom:2px dotted var(--red);color:var(--red)}
+.tok.rv-false{background:rgba(109,135,160,.2);border-bottom:2px solid var(--blue);color:var(--blue);font-weight:600}
+.tok.rv-deb{background:rgba(207,160,85,.2);border-bottom:2px solid var(--yellow);color:var(--yellow);font-weight:600}
+.aihead{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.aihead .bot{width:22px;height:22px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:9px;font-family:var(--mono);font-size:11.5px}
+.legend span{display:flex;align-items:center;gap:5px;color:var(--ink-3)}
+.legend i{width:10px;height:10px;border-radius:2px;display:block}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.sbox{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:11px;display:flex;flex-direction:column;gap:3px;align-items:center}
+.sbox b{font-family:var(--slab);font-size:26px;line-height:1}
+.sbox span{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink-3)}
+.expl{display:flex;flex-direction:column;gap:8px}
+.exrow{display:flex;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:13.5px;line-height:1.6}
+.exrow .tag{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;flex:none;height:fit-content}
+.exrow b{color:var(--ink)}
+.ex-hit{border-color:var(--sage)} .ex-hit .tag{border:1px solid var(--sage);color:var(--sage)}
+.ex-miss{border-color:var(--red)} .ex-miss .tag{border:1px solid var(--red);color:var(--red)}
+.ex-false{border-color:var(--blue)} .ex-false .tag{border:1px solid var(--blue);color:var(--blue)}
+.ex-deb{border-color:var(--yellow)} .ex-deb .tag{border:1px solid var(--yellow);color:var(--yellow)}
+
+/* 종족 / 아이템 */
+.sp{display:flex;flex-direction:column;gap:6px;padding:14px}
+.sp .nm{font-family:var(--slab);font-size:17px;font-weight:700}
+.sp .yr{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.sp .ex{font-size:13px;color:var(--ink-2);font-style:italic;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:8px 0}
+.sp ul{margin:0;padding-left:16px;font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.sp[aria-pressed=true]{border-color:var(--yellow);background:rgba(207,160,85,.12)}
+.sp.locked{opacity:.42}
+.lockmsg{font-family:var(--mono);font-size:11.5px;color:var(--red)}
+
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.it{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);font-size:12.5px;font-weight:600;text-align:center;width:auto}
+.it .ic{font-size:23px;line-height:1}
+.it[aria-pressed=true]{border-color:var(--yellow);background:rgba(207,160,85,.2)}
+.it.locked{opacity:.28}
+.it.busted{opacity:.42;border-color:var(--blue)}
+.it .lk{font-family:var(--mono);font-size:9px;color:var(--ink-3);line-height:1.3}
+.it.busted .lk{color:var(--blue)}
+.slots{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+.bonus{font-family:var(--mono);font-size:12px;color:var(--sage)}
+.bonus.minus{color:var(--red)}
+
+/* 장면 */
+.stage{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0b0906}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/10}
+.stage .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 12px;
+  background:linear-gradient(180deg,transparent,rgba(8,6,4,.88));
+  font-family:var(--slab);font-size:16px;font-weight:600;line-height:1.4}
+.scene{font-size:15px;color:var(--ink-2);line-height:1.7}
+.act{font-family:var(--slab);font-size:19px;font-weight:700;line-height:1.35}
+.why{font-size:14.5px;color:var(--ink-2);line-height:1.65;border-left:2px solid var(--red);padding-left:12px}
+.hp{display:flex;gap:5px}
+.hp i{width:26px;height:9px;border-radius:2px;background:var(--line)}
+.hp i.on{background:var(--red)}
+.lost{display:flex;flex-direction:column;gap:6px}
+.lostrow{display:flex;gap:9px;align-items:baseline;font-size:13.5px;color:var(--red)}
+.lostrow b{color:var(--ink);font-weight:600}
+
+.big{font-family:var(--slab);font-size:28px;font-weight:700;line-height:1.25}
+.big.dead{color:var(--red)} .big.sym{color:var(--yellow)}
+.log{display:flex;flex-direction:column;gap:7px}
+.logrow{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);font-size:13.5px}
+.logrow.bad{border-color:var(--red)}
+.logrow .s{font-family:var(--mono);font-size:11px;color:var(--ink-3);min-width:52px;flex:none}
+.logrow .x{min-width:0;color:var(--ink-2)} .logrow .x b{color:var(--ink)}
+.note{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-left:2px solid var(--yellow);padding:11px 13px;border-radius:0 8px 8px 0}
+.note b{color:var(--ink)}
+@media(prefers-reduced-motion:reduce){*{animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 시작 -->
+<section id="vIntro">
+  <div class="card">
+    <span class="lab">국립중앙과학관 인류관</span>
+    <h1>200만 년 전에서<br>살아남기</h1>
+    <p>그 시절 동아프리카에는 세 종류의 인류가 <b>같은 땅에</b> 살고 있었습니다. 너는 그중 하나가 되어 하루를 넘겨야 합니다.</p>
+    <div class="note"><b>규칙 둘.</b><br>① 가지고 갈 수 있는 물건은 <b>전시에서 찾아낸 것만</b> 열립니다.<br>② 출발 전에 <b>AI가 쓴 묘사를 검증</b>해야 합니다. 못 잡아낸 거짓은 그대로 안고 갑니다.</div>
+    <button class="pri" id="bStart">전시 탐색 시작</button>
+    <button class="ghost" id="bReset2" hidden>기록 지우고 처음부터</button>
+  </div>
+</section>
+
+<!-- 1. 전시 탐색 -->
+<section id="vMissions" hidden>
+  <div class="card">
+    <span class="lab">1단계 · 전시 탐색</span>
+    <h2>인류관에서 답을 찾으세요</h2>
+    <p id="mProgress">0 / 6</p>
+    <div class="steps" id="mSteps"></div>
+    <p style="font-size:13px">틀리면 <b>정답을 알려주지 않습니다.</b> 전시로 돌아가세요. 한 번에 맞힌 문제에는 ★이 남습니다.</p>
+  </div>
+  <div class="mlist" id="mList" style="margin-top:12px"></div>
+  <button class="go" id="bToSp" style="margin-top:14px">찾은 것으로 준비하기</button>
+</section>
+
+<!-- 문제 -->
+<section id="vQuiz" hidden>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <span class="lab" id="qNum">문제</span><span class="tries" id="qTries"></span>
+    </div>
+    <span class="where" id="qWhere"></span>
+    <div class="q" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
+    <div class="fb" id="qFb" hidden></div>
+    <button class="pri" id="qNext" hidden>돌아가기</button>
+    <button class="ghost" id="qBack">나중에</button>
+  </div>
+</section>
+
+<!-- 2. 종족 -->
+<section id="vSpecies" hidden>
+  <div class="card">
+    <span class="lab">2단계 · 종족</span>
+    <h2>너는 무엇으로 살 것인가</h2>
+    <p id="spHint"></p>
+  </div>
+  <div id="spList" style="display:flex;flex-direction:column;gap:9px;margin-top:12px"></div>
+  <button class="go" id="bToAi" style="margin-top:14px" disabled>AI에게 물어보기</button>
+</section>
+
+<!-- 3. AI 검증 -->
+<section id="vAi" hidden>
+  <div class="card">
+    <span class="lab">3단계 · AI 검증</span>
+    <h2>AI가 그 시대를 묘사했습니다</h2>
+    <div class="aihead"><span class="bot">✦</span><span>생성형 AI · 200만 년 전 동아프리카</span></div>
+    <div class="aitext" id="aiText"></div>
+    <p style="font-size:13.5px"><b>사실과 다른 곳을 눌러 표시하세요.</b> 맞는 것을 잘못 짚으면 감점입니다. AI를 무조건 의심하는 것도 검증이 아닙니다.</p>
+    <span class="tries" id="aiCount">0곳 표시함</span>
+    <button class="pri" id="bAiDone">검증 제출</button>
+  </div>
+  <div class="card" id="aiResult" hidden style="margin-top:12px">
+    <span class="lab">검증 결과</span>
+    <div class="score">
+      <div class="sbox"><b id="scHit" style="color:var(--sage)">0</b><span>찾아냄</span></div>
+      <div class="sbox"><b id="scMiss" style="color:var(--red)">0</b><span>놓침</span></div>
+      <div class="sbox"><b id="scFalse" style="color:var(--blue)">0</b><span>잘못 짚음</span></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--sage)"></i>찾아냄</span>
+      <span><i style="background:var(--red)"></i>놓친 거짓</span>
+      <span><i style="background:var(--blue)"></i>맞는데 짚음</span>
+      <span><i style="background:var(--yellow)"></i>논쟁 중</span>
+    </div>
+    <div class="expl" id="aiExpl"></div>
+    <div class="note" id="aiEffect"></div>
+    <button class="go" id="bToItems">장비 고르기</button>
+  </div>
+</section>
+
+<!-- 4. 장비 -->
+<section id="vItems" hidden>
+  <div class="card">
+    <span class="lab">4단계 · 장비</span>
+    <h2 id="itTitle">무엇을 지고 갈 것인가</h2>
+    <p>회색은 <b>전시에서 못 찾은 것</b>, 파란색은 <b>AI 환각으로 판정해 걸러낸 것</b>입니다. 아직 열려 있는 것 중에도 이 시대에 없는 물건이 섞여 있습니다.</p>
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <span class="slots" id="itSlots"></span><span class="bonus" id="itBonus"></span>
+    </div>
+    <div class="items" id="itGrid"></div>
+    <button class="pri" id="bGo" disabled>이대로 출발</button>
+  </div>
+</section>
+
+<!-- 5. 생존 -->
+<section id="vScene" hidden>
+  <div class="card">
+    <span class="lab" id="scStep"></span>
+    <h2 id="scTitle">—</h2>
+    <div class="stage"><canvas id="cv"></canvas><div class="cap" id="scCap"></div></div>
+    <div class="scene" id="scText"></div>
+    <div id="scResult" hidden style="display:flex;flex-direction:column;gap:11px">
+      <div class="act" id="scAct"></div>
+      <div class="why" id="scWhy"></div>
+      <div class="lost" id="scLost"></div>
+      <div class="hp" id="scHp"></div>
+    </div>
+    <button class="pri" id="scBtn">어떻게 되는지 본다</button>
+  </div>
+</section>
+
+<!-- 결과 -->
+<section id="vEnd" hidden>
+  <div class="card">
+    <span class="lab">결과</span>
+    <div class="big" id="endTitle">—</div>
+    <p id="endNote"></p>
+    <div class="hp" id="endHp"></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <span class="lab">기록</span>
+    <div class="score">
+      <div class="sbox"><b id="rExh">0</b><span>전시 탐색</span></div>
+      <div class="sbox"><b id="rAi">0</b><span>AI 검증</span></div>
+      <div class="sbox"><b id="rSur">—</b><span>생존</span></div>
+    </div>
+    <p style="font-size:13px" id="rSummary"></p>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <span class="lab">지나온 길</span>
+    <div class="log" id="endLog"></div>
+  </div>
+  <button class="pri" id="bAgain" style="margin-top:14px">다시 해보기</button>
+  <button class="ghost" id="bReset">전시 기록까지 지우고 처음부터</button>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+var LS="illyu-v2";
+var NOW=-2000000;
+
+/* ══════════════════════════════════════════════════════════════
+   전시 미션 — 실제 패널을 확인한 뒤 문항을 수정하세요.
+   ══════════════════════════════════════════════════════════════ */
+var MISSIONS=[
+ {id:"m1",zone:"인류의 탄생",title:"가장 오래된 인류",
+  hint:"인류의 탄생 구역, 가장 처음 나오는 패널",
+  q:"전시에서 소개하는 <b>가장 오래된 인류</b>는?",
+  opts:["사헬란트로푸스 차덴시스","오스트랄로피테쿠스 아파렌시스","호모 에렉투스","네안데르탈인"],a:0,
+  fb:"2002년에 보고된 <b>사헬란트로푸스 차덴시스</b>입니다. 오로린 투게넨시스, 아르디피테쿠스도 인류사 초기에 있었습니다.",
+  unlock:["band"],utx:"👥 무리"},
+ {id:"m2",zone:"인류진화 분기도",title:"진화의 모양",
+  hint:"진화 계통을 나뭇가지처럼 그려놓은 큰 도표",
+  q:"전시는 인류 진화가 어떤 방식이라고 설명합니까?",
+  opts:["한 종이 사라지면 곧바로 다음 종이 나타나는 계단식","여러 종이 갈라져 나오고 함께 살기도 하는 가지치기","한 줄로 곧게 이어지는 직선","같은 종이 반복해서 나타나는 순환"],a:1,
+  fb:"전시는 <b>“각 단계가 연속하여 이루어지거나 한 종이 사라지면 곧바로 다음 종이 나타나는 방식이 아니다”</b>라고 못박고 있습니다. 그래서 200만 년 전에는 여러 종이 같은 땅에 있었습니다.",
+  unlock:["water"],utx:"💧 물길 지식"},
+ {id:"m3",zone:"초기 인류 세 그룹",title:"강한 턱",
+  hint:"초기 인류를 세 무리로 나눠 비교해 둔 곳",
+  q:"<b>파란트로푸스</b> 그룹의 특징으로 전시가 설명하는 것은?",
+  opts:["뇌가 크고 도구를 만들었다","이빨이 크고 턱이 강해 거친 음식을 먹었다","완전한 직립보행을 했지만 나무도 탔다","불을 다룰 줄 알았다"],a:1,
+  fb:"거친 음식을 씹는 데 <b>특화된</b> 무리였습니다. 그 특화가 어떤 결과를 낳는지는 곧 보게 됩니다.",
+  unlock:["paran"],utx:"파란트로푸스로 살 수 있음"},
+ {id:"m4",zone:"초기 인류 세 그룹",title:"나무와 땅 사이",
+  hint:"같은 비교 패널의 다른 칸",
+  q:"<b>오스트랄로피테쿠스</b>에 대한 전시 설명은?",
+  opts:["완전한 직립보행을 했지만 여전히 나무 위를 다녔다","네 발로 걸었다","현생 인류와 거의 같은 뇌를 가졌다","이빨이 작고 턱이 약했다"],a:0,
+  fb:"두 발로 걸으면서도 나무를 탔습니다. 뇌보다 <b>직립보행이 먼저</b> 진화했다는 뜻이기도 합니다.",
+  unlock:["austra"],utx:"오스트랄로피테쿠스로 살 수 있음"},
+ {id:"m5",zone:"석기 제작 기술",title:"가장 이른 도구",
+  hint:"돌 도구가 시대순으로 늘어서 있는 진열장",
+  q:"인류가 <b>가장 먼저</b> 만들어 쓴 석기는?",
+  opts:["간석기(마제석기)","금속을 붙인 창","뗀석기(타제석기)","활과 화살촉"],a:2,
+  fb:"돌을 깨뜨려 날을 세운 <b>뗀석기</b>가 가장 이릅니다. 약 260만 년 전부터 쓰였습니다.",
+  unlock:["stone"],utx:"🪨 뗀석기"},
+ {id:"m6",zone:"상징적 표현",title:"살아남는 것 말고",
+  hint:"피리·조각상·벽화가 함께 놓인 구역",
+  q:"전시에 나오는 <b>상징적 표현</b>에 해당하지 <b>않는</b> 것은?",
+  opts:["피리","비너스상","동굴 벽화","수레바퀴"],a:3,
+  fb:"피리, 비너스상, 동굴 벽화. <b>생존에 아무 도움이 되지 않는 일</b>을 했다는 것 — 그게 우리를 다른 종과 갈랐습니다.",
+  unlock:["ochre"],utx:"🎨 붉은 흙"}
+];
+
+var SPECIES={
+ homo:{id:"homo",name:"호모",years:"약 280만 년 전 ~ 현재",slots:4,hp:3,free:true,
+  ex:"두뇌가 크고 도구를 사용했다",
+  traits:["도구를 쓸 수 있다","장비 칸이 가장 많다","환경이 바뀌면 먹는 것을 바꾼다"]},
+ austra:{id:"austra",name:"오스트랄로피테쿠스",years:"약 400만 ~ 200만 년 전",slots:2,hp:3,
+  ex:"완전한 직립보행을 했지만 여전히 나무 위를 다녔다",
+  traits:["포식자를 만나면 나무로 피한다","도구를 만들지 못한다","마른 계절에 약하다"]},
+ paran:{id:"paran",name:"파란트로푸스",years:"약 270만 ~ 120만 년 전",slots:2,hp:4,
+  ex:"이빨이 크고 턱이 강해 거친 음식을 먹었다",
+  traits:["마른 계절에 아무 피해도 입지 않는다","체력이 가장 높다","도구를 만들지 못한다"]}
+};
+
+var ITEMS=[
+ {id:"stick",name:"막대기",icon:"🪵",ok:1,free:1},
+ {id:"band", name:"무리",  icon:"👥",ok:1},
+ {id:"stone",name:"뗀석기",icon:"🪨",ok:1},
+ {id:"water",name:"물길 지식",icon:"💧",ok:1},
+ {id:"ochre",name:"붉은 흙",icon:"🎨",ok:1},
+ {id:"spear",name:"나무창",icon:"🗡️",ok:0,free:1,year:-300000},
+ {id:"bow",  name:"활과 화살",icon:"🏹",ok:0,free:1,year:-64000},
+ {id:"dog",  name:"개",    icon:"🐕",ok:0,free:1,year:-30000},
+ {id:"hide", name:"가죽옷",icon:"🧥",ok:0,free:1,year:-40000},
+ {id:"pot",  name:"토기",  icon:"🏺",ok:0,free:1,year:-20000},
+ {id:"corn", name:"옥수수",icon:"🌽",ok:0,free:1,year:-9000}
+];
+var BY={}; ITEMS.forEach(function(i){BY[i.id]=i;});
+
+/* ══ AI 묘사 ══ t:토큰 / k:종류 / why:해설 / bust:걸러낼 장비 id ══ */
+function aiTokens(spName){
+ return [
+  {t:"약 200만 년 전, "},
+  {t:"동아프리카의 초원",k:"ok",why:"맞습니다. 초기 인류의 무대는 동아프리카 대열곡 일대의 초원이었습니다."},
+  {t:"입니다. 새벽 안개가 걷히고 "},
+  {t:"아카시아 나무",k:"ok",why:"맞습니다. 아프리카 사바나를 대표하는 나무입니다."},
+  {t:" 사이로 해가 떠오릅니다. 당신은 "},
+  {t:spName,k:"ok",why:"맞습니다. 이 시기 동아프리카에 실제로 살았습니다."},
+  {t:" 무리와 함께 물가로 향합니다. 손에는 "},
+  {t:"뗀석기",k:"ok",why:"맞습니다. 약 260만 년 전부터 쓰였으니 이미 60만 년째 쓰이는 중입니다."},
+  {t:"가 들려 있고, 어깨에는 "},
+  {t:"활과 화살",k:"err",cat:"시대",bust:"bow",why:"<b>약 193만 년 이릅니다.</b> 활과 화살은 약 7만 년 전에야 나타납니다."},
+  {t:"을 메었습니다. 몸에는 "},
+  {t:"꿰맨 가죽옷",k:"err",cat:"시대",bust:"hide",why:"<b>가죽을 긁을 수는 있어도 꿰맬 바늘이 없습니다.</b> 바느질용 뼈바늘은 약 4만 년 전입니다."},
+  {t:"을 걸쳤습니다. 멀리 초원에서는 "},
+  {t:"매머드",k:"err",cat:"대륙",why:"<b>대륙이 틀렸습니다.</b> 매머드는 유라시아와 북아메리카의 동물입니다. 아프리카 초원에 없습니다."},
+  {t:" 떼가 풀을 뜯고, 언덕 너머에는 "},
+  {t:"침엽수림",k:"err",cat:"식생",why:"<b>기후가 맞지 않습니다.</b> 적도 부근 사바나에 침엽수림이 펼쳐지지 않습니다."},
+  {t:"이 빽빽합니다. 무리의 아이들은 "},
+  {t:"모닥불",k:"deb",why:"<b>틀렸다고 단정할 수 없습니다.</b> 이른 흔적을 주장하는 연구가 있고, 통제적 사용의 확실한 증거는 훨씬 뒤입니다. 학계가 아직 다투는 중입니다."},
+  {t:" 가에서 "},
+  {t:"옥수수",k:"err",cat:"대륙",why:"<b>대륙도 시대도 틀렸습니다.</b> 옥수수는 아메리카 작물이고, 농경은 약 1만 년 전에 시작됩니다."},
+  {t:"를 굽습니다. 하늘 높이 "},
+  {t:"익룡",k:"err",cat:"생물",why:"<b>6,600만 년 차이입니다.</b> 익룡은 중생대에 멸종했습니다. 인류와 만난 적이 없습니다."},
+  {t:" 한 마리가 원을 그리며 날아갑니다."}
+ ];
+}
+
+var SCENES=[
+ {id:"depart", title:"출발",         cap:"떠날 채비를 한다",   sky:"dawn"},
+ {id:"hyena",  title:"하이에나 무리", cap:"무리가 너를 보았다", sky:"dusk", predator:true, shake:true,
+  text:"해가 기울고 물가에 그림자가 늘어난다."},
+ {id:"drought",title:"마른 계절",     cap:"비가 오지 않는다",   sky:"harsh",
+  text:"부드러운 열매는 사라지고 질긴 뿌리만 남았다."},
+ {id:"climate",title:"땅이 마른다",   cap:"숲이 물러난다",      sky:"dust", recede:true,
+  text:"한 계절이 아니다. 먹이의 종류 자체가 바뀐다."}
+];
+SCENES[0].text="챙긴 것을 확인한다. 이 시대에 없는 물건은 손에 남지 않는다.";
+
+/* ── 상태 ── */
+var P={done:{},tries:{},unlocked:{},locked:{}};
+var R={species:null,picked:[],kept:[],busted:{},bonus:0,hit:0,miss:0,fals:0,deb:0,
+       hp:0,maxHp:3,step:0,log:[],alive:true};
+var curQ=null, aiToks=[], aiMark={}, aiSubmitted=false;
+
+function save(){try{localStorage.setItem(LS,JSON.stringify(P));}catch(e){}}
+function load(){try{var s=JSON.parse(localStorage.getItem(LS)||"null");
+  if(s&&s.done){P.done=s.done||{};P.tries=s.tries||{};P.unlocked=s.unlocked||{};P.locked={};}}catch(e){}}
+function show(v){["vIntro","vMissions","vQuiz","vSpecies","vAi","vItems","vScene","vEnd"]
+  .forEach(function(k){$(k).hidden=(k!==v);});window.scrollTo(0,0);}
+function unlocked(id){return !!P.unlocked[id];}
+function has(id){return R.kept.indexOf(id)>=0;}
+function fy(n){var a=Math.abs(n);return a>=10000?Math.round(a/10000)+"만 년":Math.round(a/1000)+"천 년";}
+function jong(s){if(!s)return true;var c=s.charCodeAt(s.length-1);
+  if(c<0xAC00||c>0xD7A3)return true;return (c-0xAC00)%28!==0;}
+function J(s,a,b){return s+(jong(s)?a:b);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ══ 1. 전시 탐색 ══ */
+function star(id){var n=P.tries[id]||0;return !P.done[id]?"?":n<=1?"★":n===2?"☆":"·";}
+function renderMissions(){
+ var n=Object.keys(P.done).length;
+ $("mProgress").textContent=n+" / "+MISSIONS.length;
+ var st=$("mSteps");st.innerHTML="";
+ MISSIONS.forEach(function(m){var i=document.createElement("i");
+   if(P.done[m.id])i.className=(P.tries[m.id]||0)<=1?"on":"half";st.appendChild(i);});
+ var L=$("mList");L.innerHTML="";
+ MISSIONS.forEach(function(m,ix){
+   var lk=!!P.locked[m.id]&&!P.done[m.id];
+   var b=document.createElement("button");
+   b.className="mrow"+(P.done[m.id]?" done":"")+(lk?" locked":"");
+   b.disabled=lk;
+   b.innerHTML='<span class="n">'+(ix+1)+'</span><span class="t"><b>'+m.title+
+     '</b><span>'+m.zone+'</span></span><span class="mk">'+(lk?"잠김":star(m.id))+'</span>';
+   b.addEventListener("click",function(){openQ(m,ix);});
+   L.appendChild(b);
+ });
+ show("vMissions");
+}
+function openQ(m,ix){
+ curQ=m;
+ // 다른 문제를 열면 잠금이 풀린다 — 전시장을 돌아다니게 만든다
+ Object.keys(P.locked).forEach(function(k){ if(k!==m.id) delete P.locked[k]; });
+ $("qNum").textContent="문제 "+(ix+1)+" / "+MISSIONS.length;
+ $("qTries").textContent=(P.tries[m.id]?("시도 "+P.tries[m.id]+"회"):"");
+ $("qWhere").textContent="위치 · "+m.zone;
+ $("qText").innerHTML=m.q;
+ $("qFb").hidden=true;$("qNext").hidden=true;$("qBack").hidden=false;
+ var O=$("qOpts");O.innerHTML="";
+ var order=shuffle(m.opts.map(function(t,i){return {t:t,i:i};}));
+ order.forEach(function(o){
+   var b=document.createElement("button");b.textContent=o.t;
+   b.addEventListener("click",function(){answer(m,o.i,O,b);});
+   O.appendChild(b);
+ });
+ show("vQuiz");
+}
+function answer(m,i,O,btn){
+ P.tries[m.id]=(P.tries[m.id]||0)+1;
+ var right=(i===m.a);
+ Array.prototype.forEach.call(O.children,function(b){b.disabled=true;});
+ var fb=$("qFb");fb.hidden=false;
+ if(right){
+   btn.className="right";
+   fb.className="fb";
+   fb.innerHTML=m.fb+'<span class="unlock">열림 — '+m.utx+'</span>';
+   P.done[m.id]=1; m.unlock.forEach(function(u){P.unlocked[u]=1;});
+   delete P.locked[m.id];
+   $("qNext").textContent="돌아가기";
+ } else {
+   fb.className="fb no";
+   fb.innerHTML="<b>틀렸습니다.</b> 정답은 알려주지 않습니다.<br>"+
+     '<span style="color:var(--yellow)">'+m.hint+'</span> 을(를) 다시 보고 오세요.<br>'+
+     '<span class="tries">다른 문제를 하나 열어야 이 문제가 다시 열립니다.</span>';
+   P.locked[m.id]=1;
+   $("qNext").textContent="목록으로";
+ }
+ save();
+ $("qNext").hidden=false;$("qBack").hidden=true;
+}
+$("qNext").addEventListener("click",renderMissions);
+$("qBack").addEventListener("click",renderMissions);
+
+/* ══ 2. 종족 ══ */
+function renderSpecies(){
+ var box=$("spList");box.innerHTML="";
+ var n=["austra","paran"].filter(unlocked).length;
+ $("spHint").innerHTML=n===2?"세 종족 모두 열렸습니다. 전시에서 읽은 특징을 떠올려 고르세요."
+   :"<b>아직 찾지 못한 종족이 있습니다.</b> 전시에서 그 종족의 특징을 찾으면 열립니다.";
+ ["homo","austra","paran"].forEach(function(k){
+  var s=SPECIES[k],lock=!s.free&&!unlocked(k);
+  var b=document.createElement("button");
+  b.className="sp"+(lock?" locked":"");b.dataset.sp=k;b.disabled=lock;
+  b.setAttribute("aria-pressed",String(R.species===k));
+  b.innerHTML='<span class="nm">'+s.name+'</span><span class="yr">'+s.years+'</span>'+
+   '<span class="ex">"'+s.ex+'"</span><ul>'+s.traits.map(function(t){return "<li>"+t+"</li>";}).join("")+'</ul>'+
+   '<span class="yr">장비 칸 '+s.slots+' · 체력 '+s.hp+'</span>'+(lock?'<span class="lockmsg">전시에서 찾지 못했습니다</span>':"");
+  b.addEventListener("click",function(){
+    R.species=k;
+    Array.prototype.forEach.call(box.children,function(c){c.setAttribute("aria-pressed",String(c.dataset.sp===k));});
+    $("bToAi").disabled=false;
+  });
+  box.appendChild(b);
+ });
+ $("bToAi").disabled=!R.species;
+ show("vSpecies");
+}
+
+/* ══ 3. AI 검증 ══ */
+function renderAi(){
+ aiToks=aiTokens(SPECIES[R.species].name);
+ aiMark={};aiSubmitted=false;
+ var box=$("aiText");box.innerHTML="";
+ aiToks.forEach(function(tk,ix){
+  if(!tk.k){box.appendChild(document.createTextNode(tk.t));return;}
+  var s=document.createElement("span");
+  s.className="tok";s.dataset.ix=ix;s.textContent=tk.t;
+  s.setAttribute("role","button");s.setAttribute("tabindex","0");s.setAttribute("aria-pressed","false");
+  var toggle=function(){
+    if(aiSubmitted)return;
+    aiMark[ix]=!aiMark[ix];
+    s.setAttribute("aria-pressed",String(!!aiMark[ix]));
+    $("aiCount").textContent=Object.keys(aiMark).filter(function(k){return aiMark[k];}).length+"곳 표시함";
+  };
+  s.addEventListener("click",toggle);
+  s.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+  box.appendChild(s);
+ });
+ $("aiCount").textContent="0곳 표시함";
+ $("aiResult").hidden=true;$("bAiDone").hidden=false;
+ show("vAi");
+}
+$("bAiDone").addEventListener("click",function(){
+ if(aiSubmitted)return;
+ aiSubmitted=true;
+ R.hit=0;R.miss=0;R.fals=0;R.deb=0;R.busted={};
+ var ex=$("aiExpl");ex.innerHTML="";
+ aiToks.forEach(function(tk,ix){
+  if(!tk.k)return;
+  var el=$("aiText").querySelector('[data-ix="'+ix+'"]');
+  var marked=!!aiMark[ix],cls,tag,kind;
+  if(tk.k==="err"&&marked){R.hit++;cls="rv-hit";tag="찾아냄";kind="hit";
+    if(tk.bust)R.busted[tk.bust]=1;}
+  else if(tk.k==="err"&&!marked){R.miss++;cls="rv-miss";tag="놓침";kind="miss";}
+  else if(tk.k==="deb"&&marked){R.deb++;cls="rv-deb";tag="논쟁 중";kind="deb";}
+  else if(tk.k==="ok"&&marked){R.fals++;cls="rv-false";tag="맞는데 짚음";kind="false";}
+  else return;                       // 안 짚은 정상 서술은 표시하지 않는다
+  el.className="tok "+cls;el.setAttribute("aria-pressed","false");
+  var d=document.createElement("div");d.className="exrow ex-"+kind;
+  d.innerHTML='<span class="tag">'+tag+'</span><span><b>'+tk.t+'</b> — '+tk.why+
+    (tk.cat?' <span class="tries">['+tk.cat+' 오류]</span>':"")+'</span>';
+  ex.appendChild(d);
+ });
+ $("scHit").textContent=R.hit;$("scMiss").textContent=R.miss;$("scFalse").textContent=R.fals;
+
+ // 환경 오류(장비와 무관한 것)를 잡아낸 만큼 관찰력 보너스
+ var envHit=0;
+ aiToks.forEach(function(tk,ix){ if(tk.k==="err"&&!tk.bust&&aiMark[ix])envHit++; });
+ R.bonus=(envHit>=4?2:envHit>=2?1:0)-Math.min(2,R.fals);
+ var eff=[];
+ if(Object.keys(R.busted).length)eff.push("<b>"+Object.keys(R.busted).map(function(k){return BY[k].name;}).join(", ")+
+   "</b>을(를) 환각으로 판정해 장비 목록에서 걸러냈습니다.");
+ if(envHit>=2)eff.push("환경 오류를 "+envHit+"개 찾아 <b>장비 칸 +"+(envHit>=4?2:1)+"</b>");
+ if(R.fals)eff.push("맞는 서술을 "+R.fals+"개 짚어 <b>장비 칸 -"+Math.min(2,R.fals)+"</b>");
+ if(R.deb)eff.push("논쟁 중인 항목을 단정했습니다. 감점은 없지만 기록에 남습니다.");
+ if(!eff.length)eff.push("아무것도 찾지 못했습니다. AI가 쓴 그대로의 세계로 갑니다.");
+ $("aiEffect").innerHTML=eff.join("<br>");
+ $("aiResult").hidden=false;$("bAiDone").hidden=true;
+ $("aiResult").scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+/* ══ 4. 장비 ══ */
+function slotCount(){return Math.max(1,SPECIES[R.species].slots+R.bonus);}
+function renderItems(){
+ var sp=SPECIES[R.species];
+ $("itTitle").textContent=sp.name+"으로 무엇을 지고 갈까";
+ var g=$("itGrid");g.innerHTML="";
+ ITEMS.forEach(function(it){
+  var bust=!!R.busted[it.id], lock=(!it.free&&!unlocked(it.id));
+  var b=document.createElement("button");
+  b.className="it"+(lock?" locked":"")+(bust?" busted":"");
+  b.dataset.id=it.id;b.disabled=lock||bust;
+  b.innerHTML='<span class="ic">'+it.icon+'</span><span>'+it.name+'</span>'+
+    (bust?'<span class="lk">환각으로 판정</span>':lock?'<span class="lk">잠김</span>':"");
+  b.addEventListener("click",function(){
+   var i=R.picked.indexOf(it.id);
+   if(i>=0)R.picked.splice(i,1); else if(R.picked.length<slotCount())R.picked.push(it.id);
+   refreshItems();
+  });
+  g.appendChild(b);
+ });
+ refreshItems();show("vItems");
+}
+function refreshItems(){
+ $("itSlots").textContent="장비 칸 "+R.picked.length+" / "+slotCount();
+ var bn=$("itBonus");
+ bn.className="bonus"+(R.bonus<0?" minus":"");
+ bn.textContent=R.bonus>0?("AI 검증 보너스 +"+R.bonus):R.bonus<0?("오판 감점 "+R.bonus):"";
+ Array.prototype.forEach.call($("itGrid").children,function(b){
+  var it=BY[b.dataset.id],bust=!!R.busted[it.id],lock=(!it.free&&!unlocked(it.id));
+  var on=R.picked.indexOf(it.id)>=0;
+  b.setAttribute("aria-pressed",String(on));
+  b.disabled=lock||bust||(!on&&R.picked.length>=slotCount());
+ });
+ $("bGo").disabled=R.picked.length===0;
+}
+
+/* ══ 5. 판정 ══ */
+function resolve(id){
+ var sp=R.species,rej=null;
+ for(var i=0;i<R.picked.length;i++){var it=BY[R.picked[i]];if(!it.ok){rej=it;break;}}
+ if(id==="hyena"){
+  if(sp==="austra")return{act:"나무 위로 올라간다",dmg:0,why:"하이에나는 나무를 오르지 못한다."};
+  if(has("band"))  return{act:"무리를 부른다",dmg:0,why:"여럿이 소리치자 무리가 물러났다."};
+  if(rej)return{act:J(rej.name,"을","를")+" 잡으려 한다",dmg:2,
+    why:"손에 아무것도 없었다. "+J(rej.name,"은","는")+" "+fy(rej.year-NOW)+" 뒤의 물건이다."};
+  if(sp==="paran") return{act:"몸을 세우고 버틴다",dmg:1,why:"덩치가 시간을 벌어주었다."};
+  if(has("stone")) return{act:"돌을 던진다",dmg:1,why:"맞지는 않았지만 거리를 벌었다."};
+  return{act:"달아난다",dmg:2,why:"하이에나가 더 빨랐다."};
+ }
+ if(id==="drought"){
+  if(sp==="paran") return{act:"질긴 뿌리를 씹는다",dmg:0,why:"네 턱에는 문제가 되지 않았다."};
+  if(has("water")) return{act:"물길을 따라간다",dmg:0,why:"어디로 가야 하는지 알고 있었다."};
+  if(has("stone")) return{act:"석기로 뿌리를 캔다",dmg:1,why:"캤지만 충분하지 않았다."};
+  if(rej)return{act:J(rej.name,"을","를")+" 찾는다",dmg:2,
+    why:J(rej.name,"은","는")+" 여기 없다. "+fy(rej.year-NOW)+" 뒤에야 나타난다."};
+  return{act:"먹을 것을 찾아 헤맨다",dmg:2,why:"찾지 못했다."};
+ }
+ if(id==="climate"){
+  if(sp==="paran")return{act:"하던 대로 씹는다",dmg:99,dead:true,
+    why:"거친 것을 씹는 데 특화된 턱은, 씹을 것 자체가 사라지자 아무 쓸모가 없었다."};
+  if(sp==="homo"&&has("stone"))return{act:"도구로 새로운 것을 연다",dmg:0,why:"전에 못 먹던 것을 먹기 시작했다."};
+  if(sp==="homo") return{act:"가리지 않고 먹는다",dmg:1,why:"버텼지만 몸이 줄었다."};
+  if(has("water"))return{act:"물을 따라 옮겨간다",dmg:1,why:"남은 물가를 찾아 버텼다."};
+  return{act:"하던 대로 한다",dmg:2,why:"땅은 하던 대로가 아니었다."};
+ }
+ return{act:"",dmg:0,why:""};
+}
+
+/* ══════════ Canvas 장면 ══════════ */
+var cv=$("cv"),cx=cv.getContext("2d"),W=0,H=0,t0=0,raf=0,shakeAmt=0;
+var SKY={
+ dawn: {top:"#141d33",mid:"#4a3b52",bot:"#e0844e",sun:"#ffd9a0",sy:.72,haze:"#8a6a55",fog:.35},
+ dusk: {top:"#241026",mid:"#6b2530",bot:"#d4532a",sun:"#ffb070",sy:.78,haze:"#7a3628",fog:.28},
+ harsh:{top:"#7f8fa6",mid:"#c9bd96",bot:"#ece2c4",sun:"#fffbe8",sy:.26,haze:"#c2b48c",fog:.42},
+ dust: {top:"#4a4032",mid:"#7c6a4e",bot:"#a8916a",sun:"#d8c398",sy:.4, haze:"#8d7a5c",fog:.62}
+};
+function sizeCanvas(){
+ var r=cv.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);
+ W=Math.max(320,Math.round(r.width));H=Math.round(W*10/16);
+ cv.width=Math.round(W*d);cv.height=Math.round(H*d);
+ cx.setTransform(d,0,0,d,0,0);
+}
+function rnd(seed){var x=Math.sin(seed*127.1)*43758.5453;return x-Math.floor(x);}
+
+function drawScene(sc,now,revealed){
+ var S=SKY[sc.sky],T=(now-t0)/1000;
+ cx.save();
+ if(sc.shake&&!revealed){ shakeAmt=Math.min(1,T/9); }
+ else shakeAmt=0;
+ if(shakeAmt>0.35){var s=(shakeAmt-0.35)*4;
+   cx.translate((Math.random()-.5)*s,(Math.random()-.5)*s*.6);}
+
+ // 하늘
+ var g=cx.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,S.top);g.addColorStop(.5,S.mid);g.addColorStop(1,S.bot);
+ cx.fillStyle=g;cx.fillRect(-6,-6,W+12,H+12);
+
+ // 해
+ var sx=W*(.24+.02*Math.sin(T*.15)),sy=H*S.sy;
+ var sg=cx.createRadialGradient(sx,sy,2,sx,sy,H*.55);
+ sg.addColorStop(0,S.sun);sg.addColorStop(.12,S.sun);
+ sg.addColorStop(.45,"rgba(255,200,140,.18)");sg.addColorStop(1,"rgba(0,0,0,0)");
+ cx.globalAlpha=.85;cx.fillStyle=sg;cx.fillRect(0,0,W,H);cx.globalAlpha=1;
+ cx.beginPath();cx.arc(sx,sy,H*.055,0,7);cx.fillStyle=S.sun;cx.fill();
+
+ // 원경 산 (대기 원근으로 흐리게)
+ layerHills(H*.66,H*.10,.22,S.haze,7,T*2);
+ layerHills(H*.72,H*.08,.34,S.haze,11,T*3);
+
+ // 중경 나무 — 기후 장면에서는 물러난다
+ var recede=sc.recede?Math.min(1,Math.max(0,(T-1.5)/7)):0;
+ for(var i=0;i<9;i++){
+  var f=rnd(i*3.7),x=W*(.06+f*.9),h=H*(.13+rnd(i*9.1)*.09);
+  var a=sc.recede?Math.max(0,1-recede*(0.4+f*1.1)):1;
+  if(a<=0.02)continue;
+  cx.globalAlpha=a*.82;
+  tree(x+(sc.recede?recede*(x-W/2)*.35:0),H*.80,h*(sc.recede?(1-recede*.45):1),"#221a12");
+ }
+ cx.globalAlpha=1;
+
+ // 땅
+ var gg=cx.createLinearGradient(0,H*.78,0,H);
+ gg.addColorStop(0,"#2b2116");gg.addColorStop(1,"#150f09");
+ cx.fillStyle=gg;cx.fillRect(0,H*.78,W,H*.22);
+
+ // 갈라진 땅 (가뭄)
+ if(sc.id==="drought"){
+  cx.strokeStyle="rgba(0,0,0,.45)";cx.lineWidth=1.6;
+  for(var c=0;c<7;c++){var bx=W*rnd(c*5.3);
+   cx.beginPath();cx.moveTo(bx,H*.82);
+   cx.lineTo(bx+(rnd(c*2.2)-.5)*40,H*.92);cx.lineTo(bx+(rnd(c*4.4)-.5)*70,H);cx.stroke();}
+ }
+
+ // 사람들
+ var n=3;
+ for(var p=0;p<n;p++){
+  var px=W*(.60+p*.11),bob=Math.sin(T*4.4+p*1.7)*2.4;
+  figure(px,H*.885+bob,H*.115,"#171009");
+ }
+
+ // 포식자
+ if(sc.predator&&!revealed){
+  var app=Math.min(1,T/9);
+  var qx=W*(-0.18+app*0.72),qs=H*(.10+app*.10);
+  quad(qx,H*.885,qs,"#12100a");
+ } else if(sc.predator&&revealed){
+  quad(W*0.50,H*.885,H*.20,"#12100a");
+ }
+
+ // 전경 풀
+ cx.fillStyle="#0e0a06";
+ for(var k=0;k<46;k++){
+  var gx=W*rnd(k*1.13),gh=H*(.05+rnd(k*7.7)*.06);
+  var sw=Math.sin(T*1.6+k)*3.2;
+  cx.beginPath();cx.moveTo(gx,H);
+  cx.quadraticCurveTo(gx+sw*.5,H-gh*.6,gx+sw,H-gh);
+  cx.lineTo(gx+sw+2.2,H-gh*.95);cx.quadraticCurveTo(gx+sw*.5+2,H-gh*.55,gx+2.6,H);
+  cx.closePath();cx.fill();
+ }
+
+ // 먼지 입자
+ cx.fillStyle="rgba(255,225,190,"+(sc.id==="climate"?.30:.16)+")";
+ var pn=sc.id==="climate"?70:34;
+ for(var d2=0;d2<pn;d2++){
+  var sp2=sc.id==="climate"?120:26;
+  var dx=(W*rnd(d2*2.9)+T*sp2)%(W+40)-20;
+  var dy=H*(.30+rnd(d2*6.1)*.62)+Math.sin(T*1.1+d2)*7;
+  cx.fillRect(dx,dy,sc.id==="climate"?2.6:1.7,1.5);
+ }
+
+ // 안개 · 비네트
+ cx.fillStyle=S.haze;cx.globalAlpha=S.fog*.5;
+ cx.fillRect(0,H*.55,W,H*.45);cx.globalAlpha=1;
+ var vg=cx.createRadialGradient(W/2,H*.5,H*.28,W/2,H*.5,H*.92);
+ vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.62)");
+ cx.fillStyle=vg;cx.fillRect(0,0,W,H);
+ if(sc.shake&&!revealed&&shakeAmt>.45){
+  cx.fillStyle="rgba(150,30,10,"+((shakeAmt-.45)*.22)+")";cx.fillRect(0,0,W,H);
+ }
+ cx.restore();
+}
+function layerHills(base,amp,alpha,color,seed,off){
+ cx.globalAlpha=alpha;cx.fillStyle=color;cx.beginPath();cx.moveTo(0,H);
+ for(var x=0;x<=W;x+=8){
+  var y=base-Math.sin((x+off)*0.006+seed)*amp-Math.sin((x+off)*0.017+seed*2)*amp*.45;
+  cx.lineTo(x,y);
+ }
+ cx.lineTo(W,H);cx.closePath();cx.fill();cx.globalAlpha=1;
+}
+function tree(x,y,h,c){
+ cx.fillStyle=c;
+ cx.fillRect(x-h*.045,y-h*.62,h*.09,h*.62);
+ cx.beginPath();cx.ellipse(x,y-h*.70,h*.42,h*.20,0,0,7);cx.fill();
+ cx.beginPath();cx.ellipse(x-h*.16,y-h*.60,h*.24,h*.12,0,0,7);cx.fill();
+}
+function figure(x,y,h,c){
+ cx.fillStyle=c;
+ cx.beginPath();cx.arc(x,y-h*.86,h*.15,0,7);cx.fill();
+ cx.beginPath();cx.moveTo(x-h*.11,y-h*.70);cx.lineTo(x+h*.11,y-h*.70);
+ cx.lineTo(x+h*.15,y-h*.28);cx.lineTo(x-h*.15,y-h*.28);cx.closePath();cx.fill();
+ cx.fillRect(x-h*.13,y-h*.30,h*.09,h*.30);
+ cx.fillRect(x+h*.04,y-h*.30,h*.09,h*.30);
+ cx.fillRect(x-h*.30,y-h*.66,h*.20,h*.07);
+ cx.fillRect(x+h*.10,y-h*.66,h*.20,h*.07);
+}
+function quad(x,y,h,c){
+ cx.fillStyle=c;
+ cx.beginPath();cx.ellipse(x,y-h*.46,h*.44,h*.22,0,0,7);cx.fill();
+ cx.beginPath();cx.moveTo(x+h*.36,y-h*.56);cx.lineTo(x+h*.72,y-h*.80);
+ cx.lineTo(x+h*.86,y-h*.72);cx.lineTo(x+h*.84,y-h*.56);cx.lineTo(x+h*.50,y-h*.38);cx.closePath();cx.fill();
+ cx.beginPath();cx.moveTo(x+h*.66,y-h*.80);cx.lineTo(x+h*.70,y-h*.96);cx.lineTo(x+h*.80,y-h*.80);cx.closePath();cx.fill();
+ [[-.30,0],[-.06,.02],[.16,.02],[.34,0]].forEach(function(o){
+  cx.fillRect(x+h*o[0],y-h*(.30-o[1]),h*.075,h*.30);
+ });
+ cx.beginPath();cx.moveTo(x-h*.40,y-h*.50);cx.lineTo(x-h*.74,y-h*.72);
+ cx.lineTo(x-h*.78,y-h*.62);cx.lineTo(x-h*.44,y-h*.42);cx.closePath();cx.fill();
+}
+
+function startLoop(sc){
+ cancelAnimationFrame(raf);sizeCanvas();t0=performance.now();
+ (function loop(now){ raf=requestAnimationFrame(loop);
+   drawScene(sc,now,!$("scResult").hidden); })(t0);
+}
+window.addEventListener("resize",function(){ if(!$("vScene").hidden) sizeCanvas(); });
+
+/* ══ 장면 진행 ══ */
+function startRun(){
+ var sp=SPECIES[R.species];
+ R.hp=sp.hp;R.maxHp=sp.hp;R.step=0;R.log=[];R.alive=true;
+ R.kept=R.picked.filter(function(id){return BY[id].ok;});
+ renderScene();
+}
+function hpBar(el){el.innerHTML="";
+ for(var i=0;i<R.maxHp;i++){var e=document.createElement("i");if(i<R.hp)e.className="on";el.appendChild(e);}}
+function renderScene(){
+ var sc=SCENES[R.step];
+ $("scStep").textContent="장면 "+(R.step+1)+" / "+SCENES.length;
+ $("scTitle").textContent=sc.title;$("scCap").textContent=sc.cap;
+ $("scText").textContent=sc.text;
+ $("scResult").hidden=true;$("scBtn").hidden=false;
+ $("scBtn").textContent=sc.id==="depart"?"손에 무엇이 남았는지 본다":"어떻게 되는지 본다";
+ show("vScene");startLoop(sc);
+}
+$("scBtn").addEventListener("click",function(){
+ var sc=SCENES[R.step];
+ if($("scResult").hidden){
+  if(sc.id==="depart"){
+   var lost=R.picked.filter(function(id){return !BY[id].ok;}).map(function(id){return BY[id];});
+   $("scAct").textContent=lost.length?"손에서 사라진 것":"챙긴 것이 모두 남았다";
+   $("scWhy").textContent=lost.length?"":"이 시대에 실제로 있던 것만 골랐습니다.";
+   var L=$("scLost");L.innerHTML="";
+   lost.forEach(function(it){var d=document.createElement("div");d.className="lostrow";
+    d.innerHTML='<b>'+it.icon+' '+it.name+'</b><span>'+fy(it.year-NOW)+' 뒤의 물건이다</span>';L.appendChild(d);});
+   R.log.push({s:sc.title,act:lost.length?(lost.map(function(i){return i.name;}).join(", ")+" 없음"):"모두 남음",why:"",bad:lost.length>0});
+  } else {
+   var r=resolve(sc.id);
+   R.hp-=r.dmg;if(r.dead||R.hp<=0){R.hp=0;R.alive=false;}
+   $("scAct").textContent=r.act;$("scWhy").textContent=r.why;$("scLost").innerHTML="";
+   R.log.push({s:sc.title,act:r.act,why:r.why,bad:r.dmg>0});
+  }
+  hpBar($("scHp"));$("scResult").hidden=false;
+  $("scBtn").textContent=(!R.alive||R.step>=SCENES.length-1)?"결과 보기":"다음";
+  return;
+ }
+ if(!R.alive||R.step>=SCENES.length-1){cancelAnimationFrame(raf);return renderEnd();}
+ R.step++;renderScene();
+});
+
+/* ══ 결과 ══ */
+function renderEnd(){
+ var sym=R.alive&&has("ochre");
+ var t=$("endTitle");
+ if(!R.alive){t.textContent="여기서 끝났다";t.className="big dead";
+  $("endNote").textContent="너는 잘못 플레이하지 않았을 수도 있다. 너무 잘 적응했을 뿐일 수도 있다.";}
+ else if(sym){t.textContent="살아남았고, 그렸다";t.className="big sym";
+  $("endNote").textContent="호모 사피엔스를 다른 종과 가른 것은 생존이 아니라, 살아남고도 그림을 그렸다는 사실이다.";}
+ else{t.textContent="살아남았다";t.className="big";
+  $("endNote").textContent="너는 살아남았다. 그런데 아무것도 남기지 않았다.";}
+ hpBar($("endHp"));
+
+ var found=Object.keys(P.done).length;
+ var perfect=MISSIONS.filter(function(m){return P.done[m.id]&&(P.tries[m.id]||0)<=1;}).length;
+ var errTotal=aiToks.filter(function(x){return x.k==="err";}).length;
+ $("rExh").textContent=found+"/"+MISSIONS.length;
+ $("rAi").textContent=R.hit+"/"+errTotal;
+ $("rSur").textContent=R.alive?(sym?"◎":"○"):"✕";
+ $("rSur").style.color=R.alive?(sym?"var(--yellow)":"var(--sage)"):"var(--red)";
+ $("rSummary").innerHTML="전시 "+found+"문제 중 <b>"+perfect+"문제를 한 번에</b> 맞혔습니다. "+
+  "AI 묘사에서 거짓 "+errTotal+"개 중 <b>"+R.hit+"개</b>를 찾아냈고, 맞는 서술을 <b>"+R.fals+"번</b> 잘못 짚었습니다."+
+  (R.deb?" 논쟁 중인 항목을 <b>단정</b>한 적이 "+R.deb+"번 있습니다.":"");
+
+ var L=$("endLog");L.innerHTML="";
+ R.log.forEach(function(x){var d=document.createElement("div");d.className="logrow"+(x.bad?" bad":"");
+  d.innerHTML='<span class="s">'+x.s+'</span><span class="x"><b>'+x.act+'</b>'+(x.why?"<br>"+x.why:"")+'</span>';L.appendChild(d);});
+ show("vEnd");
+}
+
+/* ══ 이동 ══ */
+$("bStart").addEventListener("click",renderMissions);
+$("bToSp").addEventListener("click",renderSpecies);
+$("bToAi").addEventListener("click",renderAi);
+$("bToItems").addEventListener("click",renderItems);
+$("bGo").addEventListener("click",startRun);
+$("bAgain").addEventListener("click",function(){
+ R.species=null;R.picked=[];R.busted={};R.bonus=0;R.hit=R.miss=R.fals=R.deb=0;renderSpecies();});
+function hardReset(){
+ if(!confirm("전시에서 찾은 기록까지 모두 지웁니다. 계속할까요?"))return;
+ P={done:{},tries:{},unlocked:{},locked:{}};save();
+ R={species:null,picked:[],kept:[],busted:{},bonus:0,hit:0,miss:0,fals:0,deb:0,hp:0,maxHp:3,step:0,log:[],alive:true};
+ show("vIntro");$("bReset2").hidden=true;
+}
+$("bReset").addEventListener("click",hardReset);
+$("bReset2").addEventListener("click",hardReset);
+
+load();
+if(Object.keys(P.done).length)$("bReset2").hidden=false;
+show("vIntro");
+})();
+</script>
+</body>
+</html>
