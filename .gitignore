@@ -4,6 +4,10 @@
 .env.*
 !.env.example
 
+# 전시 패널 현장 사진 (답지 아카이브 — 로컬/드라이브에만 보관)
+# 전사본은 docs/전시패널-원문.md 에 들어 있습니다.
+KakaoTalk_*.jpg
+
 # OS / 편집기
 .DS_Store
 Thumbs.db
